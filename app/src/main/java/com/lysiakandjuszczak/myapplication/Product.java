@@ -7,8 +7,9 @@ package com.lysiakandjuszczak.myapplication;
 public class Product {
 
     private String name;
-    private Double prize;
+    private double prize;
     private String category;
+    private int count;
 
     public String getName() {
         return name;
@@ -18,11 +19,11 @@ public class Product {
         this.name = name;
     }
 
-    public Double getPrize() {
+    public double getPrize() {
         return prize;
     }
 
-    public void setPrize(Double prize) {
+    public void setPrize(double prize) {
         this.prize = prize;
     }
 
@@ -32,5 +33,13 @@ public class Product {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
     }
 }

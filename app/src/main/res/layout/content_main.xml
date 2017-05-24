@@ -119,10 +119,10 @@
             android:id="@+id/buttonAddProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Button"
-            android:layout_marginTop="22dp"
+            android:layout_alignStart="@+id/editTextCategory"
             android:layout_below="@+id/editTextCategory"
-            android:layout_alignStart="@+id/editTextCategory" />
+            android:layout_marginTop="22dp"
+            android:text="Dodaj" />
 
         <TextView
             android:id="@+id/textView15"

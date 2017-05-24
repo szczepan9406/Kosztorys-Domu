@@ -72,7 +72,12 @@ public class MainActivity extends AppCompatActivity
                 Double prize = (Double.parseDouble(editTextPrize.getText().toString())) * (Integer.parseInt(editTextProductCount.getText().toString()) * currency) ;
                 product.setPrize(prize);
 
-                /*zapisać do bazy*/
+                DBManager dbManager;
+                dbManager =new DBManager(getApplicationContext());
+                dbManager.createDataBase();
+                dbManager.openDataBase();
+                dbManager.insertProduct(product);
+                /*dbManager do bazy*/
             }
         });
     }
