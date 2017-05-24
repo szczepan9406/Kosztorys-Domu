@@ -3,6 +3,7 @@ package com.lysiakandjuszczak.myapplication;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.ButtonBarLayout;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,9 +13,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    EditText  editTextProductName;
+    EditText  editTextPrize;
+    EditText  editTextProductCount;
+    EditText  editTextProductCategory;
+    Spinner   spinerCurrency;
+    Button    buttonAddProduct;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +52,29 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        editTextProductName = (EditText ) findViewById(R.id.editTextProductName);
+        editTextPrize = (EditText ) findViewById(R.id.editTextPrize);
+        editTextProductCount = (EditText ) findViewById(R.id.editTextCount);
+        editTextProductCategory = (EditText ) findViewById(R.id.editTextCategory);
+        spinerCurrency = (Spinner) findViewById(R.id.spinnerCurrency);
+        buttonAddProduct = (Button) findViewById(R.id.buttonAddProduct);
+
+        buttonAddProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Product product = new Product();
+                product.setName(editTextProductName.getText().toString());
+                product.setCategory(editTextProductName.getText().toString());
+
+                Double currency = 1.00;
+                /*  pobrać kursy*/
+                Double prize = (Double.parseDouble(editTextPrize.getText().toString())) * (Integer.parseInt(editTextProductCount.getText().toString()) * currency) ;
+                product.setPrize(prize);
+
+                /*zapisać do bazy*/
+            }
+        });
     }
 
     @Override

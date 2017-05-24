@@ -39,7 +39,7 @@
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/editText5"
+            android:id="@+id/editTextProductName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/textView10"
@@ -49,11 +49,11 @@
             android:inputType="textPersonName" />
 
         <EditText
-            android:id="@+id/editText6"
+            android:id="@+id/editTextPrize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/editText5"
-            android:layout_below="@+id/editText5"
+            android:layout_alignStart="@+id/editTextProductName"
+            android:layout_below="@+id/editTextProductName"
             android:layout_marginTop="20dp"
             android:ems="10"
             android:inputType="textPersonName" />
@@ -62,25 +62,25 @@
             android:id="@+id/textView11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/editText6"
+            android:layout_alignBottom="@+id/editTextPrize"
             android:layout_alignStart="@+id/textView10"
             android:text="Cena"
             android:textSize="18sp" />
 
         <Spinner
-            android:id="@+id/spinner2"
+            android:id="@+id/spinnerCurrency"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/editText6"
+            android:layout_below="@+id/editTextPrize"
             android:layout_marginTop="21dp"
-            android:layout_alignStart="@+id/editText6"
-            android:layout_alignEnd="@+id/editText6" />
+            android:layout_alignStart="@+id/editTextPrize"
+            android:layout_alignEnd="@+id/editTextPrize" />
 
         <TextView
             android:id="@+id/textView12"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/spinner2"
+            android:layout_alignBottom="@+id/spinnerCurrency"
             android:layout_alignEnd="@+id/textView10"
             android:text="Waluta"
             android:textSize="18sp"
@@ -97,38 +97,38 @@
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/editText8"
+            android:id="@+id/editTextCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/textView13"
-            android:layout_alignStart="@+id/spinner2"
+            android:layout_alignStart="@+id/spinnerCurrency"
             android:ems="10"
             android:inputType="textPersonName" />
 
         <EditText
-            android:id="@+id/editText9"
+            android:id="@+id/editTextCategory"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/editText8"
-            android:layout_below="@+id/editText8"
+            android:layout_alignStart="@+id/editTextCount"
+            android:layout_below="@+id/editTextCount"
             android:layout_marginTop="21dp"
             android:ems="10"
             android:inputType="textPersonName" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/buttonAddProduct"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Button"
             android:layout_marginTop="22dp"
-            android:layout_below="@+id/editText9"
-            android:layout_alignStart="@+id/editText9" />
+            android:layout_below="@+id/editTextCategory"
+            android:layout_alignStart="@+id/editTextCategory" />
 
         <TextView
             android:id="@+id/textView15"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/button"
+            android:layout_above="@+id/buttonAddProduct"
             android:layout_alignStart="@+id/textView13"
             android:text="Kategoria"
             android:textSize="18sp" />
