@@ -84,7 +84,8 @@ public class DBManager extends SQLiteOpenHelper {
                 "name TEXT, "+
                 "category TEXT, "+
                 "prize REAL, "+
-                "count INT )";
+                "count INT," +
+                "currency TEXT)";
 
         db.execSQL(CREATE_PRODUCT_TABLE);
     }
@@ -107,6 +108,7 @@ public class DBManager extends SQLiteOpenHelper {
         contentValues.put("prize",product.getPrize());
         contentValues.put("count",product.getCount());
         contentValues.put("category",product.getCategory());
+        contentValues.put("currency",product.getCurrency());
 
         return db.insert("Product", null,contentValues);
     }

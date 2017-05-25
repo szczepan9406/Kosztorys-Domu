@@ -10,6 +10,7 @@ public class Product {
     private double prize;
     private String category;
     private int count;
+    private String currency;
 
     public Product(String name, double prize, int count, String category) {
         this.name = name;
@@ -52,5 +53,13 @@ public class Product {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }
