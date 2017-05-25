@@ -20,7 +20,7 @@ import java.io.OutputStream;
 public class DBManager extends SQLiteOpenHelper {
 
     private static String DB_PATCH ;
-    private static String DB_NAME="Produkt";
+    private static String DB_NAME="Produkt.db";
     private final String DATABASE_FOLDER = "/databases/";
     private final String DB_APP_PATCH = "/data/data/";
     private final String TABLE_NAME="lista_produktow";
@@ -32,10 +32,8 @@ public class DBManager extends SQLiteOpenHelper {
 
     private final String[] columns ={KEY_NAME, KEY_PRIZE, KEY_COUNT, KEY_CATEGORY};
 
-
     private SQLiteDatabase db;
     private final Context myContext;
-
 
     public DBManager (Context context){
         super(context,DB_NAME,null,1);
@@ -48,12 +46,6 @@ public class DBManager extends SQLiteOpenHelper {
 
         if(!dbExist){
             this.getReadableDatabase();
-            //this.close();
-            try {
-                copyDataBase();
-            }catch (IOException e){
-                Log.d("Copy Database","fail with copy");
-            }
         }
     }
 
@@ -72,46 +64,10 @@ public class DBManager extends SQLiteOpenHelper {
     }
 
 
-
-    private void copyDataBase() throws IOException{
-        InputStream inputStream=myContext.getAssets().open(DB_NAME);
-
-        String outFileName=DB_PATCH+DB_NAME;
-
-
-        OutputStream outputStream =new FileOutputStream(outFileName);
-
-        byte []buffer =new byte[1024];
-        int length;
-
-
-        while ((length=inputStream.read(buffer))>0){
-            outputStream.write(buffer,0,length);
-        }
-
-        outputStream.flush();
-        outputStream.close();
-        inputStream.close();
-    }
-
-//    public boolean update(Float code,String averagePrice){
-//
-//        ContentValues contentValues=new ContentValues();
-//
-//        contentValues.put("rate",averagePrice);
-//        return db.update(TABLE_NAME,contentValues,"code="+code,null)>0;
-//
-//    }
-
-
     public  void openDataBase() throws SQLiteException{
         String myPath =DB_PATCH+DB_NAME;
         db =SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
     }
-
-   /* public long versionBase(){
-        return db.getVersion();
-    }*/
 
     @Override
     public synchronized  void close (){
@@ -123,7 +79,14 @@ public class DBManager extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        String CREATE_PRODUCT_TABLE = "CREATE TABLE Product( " +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "name TEXT, "+
+                "category TEXT, "+
+                "prize REAL, "+
+                "count INT )";
 
+        db.execSQL(CREATE_PRODUCT_TABLE);
     }
 
     @Override
@@ -131,54 +94,22 @@ public class DBManager extends SQLiteOpenHelper {
 
     }
 
-//    public boolean updateCurrency(JsonParser.Position position){
-//        String code=position.code;
-//
-//        //zaokrąglenie
-//        String rate =(Count.round(Double.parseDouble(position.rate),"00.0000")).replace(',','.');
-//
-//        ContentValues contentValues=new ContentValues();
-//        contentValues.put(KEY_RATE,rate);
-//
-//        return db.update(TABLE_NAME,contentValues, KEY_CODE +"='"+code+"'",null)>0;
-
-//    }
-
     public Cursor getAllProduct(){
-        return  db.query(TABLE_NAME, columns,null,null,null,null,null);
+        db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM Product",null);
+        return  cursor;
     }
 
     public long insertProduct(Product product){
 
         ContentValues contentValues=new ContentValues();
-        contentValues.put(KEY_NAME,product.getName());
-        contentValues.put(KEY_COUNT,product.getCount());
-        contentValues.put(KEY_PRIZE,product.getPrize());
-        contentValues.put(KEY_CATEGORY,product.getCategory());
+        contentValues.put("name",product.getName());
+        contentValues.put("prize",product.getPrize());
+        contentValues.put("count",product.getCount());
+        contentValues.put("category",product.getCategory());
 
-        return db.insert(TABLE_NAME,null,contentValues);
+        return db.insert("Product", null,contentValues);
     }
-
-//    public Cursor getAllCurrency(String sort){
-//        return  db.query(TABLE_NAME, columns,null,null,null,null,sort);
-//    }
-//    public Cursor getAllCurrency(String sort,String search){
-//        return  db.query(TABLE_NAME, columns,KEY_CODE+" LIKE '%"+search+"%' OR "+KEY_NAME+" LIKE '%"+search+"%' OR "+KEY_COUNTRY+" LIKE '%"+search+"%' ",null,null,null,sort);
-//    }
-
-//    public CurrencyDescription getCurrency(String currencyCode){
-//        Cursor cursor=db.query(TABLE_NAME, columns,KEY_CODE+"='"+currencyCode+"'",null,null,null,null,null);
-//
-//        cursor.moveToFirst();
-//        String name=cursor.getString(0);
-//        String code=cursor.getString(1);
-//        String country=cursor.getString(2);
-//        Double rate=cursor.getDouble(3);
-//
-//        return (new CurrencyDescription(name,code,country,rate));
-
-
-  //  }
 
 
 }

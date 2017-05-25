@@ -1,10 +1,9 @@
 package com.lysiakandjuszczak.myapplication;
 
-import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.ButtonBarLayout;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,25 +13,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity
+import java.util.ArrayList;
+import java.util.List;
+
+public class ListProductsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    EditText  editTextProductName;
-    EditText  editTextPrize;
-    EditText  editTextProductCount;
-    EditText  editTextProductCategory;
-    Spinner   spinerCurrency;
-    Button    buttonAddProduct;
-
+    TextView allPrize ;
+    ListView listViewProdusct;
+    List<String> products;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_list_products);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -47,40 +45,48 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        editTextProductName = (EditText ) findViewById(R.id.editTextProductName);
-        editTextPrize = (EditText ) findViewById(R.id.editTextPrize);
-        editTextProductCount = (EditText ) findViewById(R.id.editTextCount);
-        editTextProductCategory = (EditText ) findViewById(R.id.editTextCategory);
-        spinerCurrency = (Spinner) findViewById(R.id.spinnerCurrency);
-        buttonAddProduct = (Button) findViewById(R.id.buttonAddProduct);
+        allPrize = (TextView) findViewById(R.id.textViewAllPrize);
+        listViewProdusct = (ListView) findViewById(R.id.list_viewProducts);
 
-        buttonAddProduct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Product product = new Product();
-                product.setName(editTextProductName.getText().toString());
-                product.setCategory(editTextProductCategory.getText().toString());
-                product.setCount(Integer.parseInt(editTextProductCount.getText().toString()));
-                Double currency = 1.00;
-                /*  pobrać kursy*/
-              //  Double prize = (Double.parseDouble(editTextPrize.getText().toString())) * (Integer.parseInt(editTextProductCount.getText().toString()) * currency) ;
-                product.setPrize(Double.parseDouble(editTextPrize.getText().toString()) * currency);
+        products  = new ArrayList<String>();
 
-                DBManager dbManager;
-                dbManager =new DBManager(getApplicationContext());
-                dbManager.createDataBase();
-                dbManager.openDataBase();
-                dbManager.insertProduct(product);
-                /*dbManager do bazy*/
-            }
-        });
+        DBManager dbManager;
+        dbManager =new DBManager(getApplicationContext());
+        dbManager.openDataBase();
+        String X = dbManager.getDatabaseName();
+
+        Cursor productsCursor = dbManager.getAllProduct();
+        updateCurrencyList(productsCursor);
+
+        populateListview();
+
+
+    }
+
+    private void populateListview() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,products);
+        listViewProdusct.setAdapter(adapter);
+    }
+
+    private void updateCurrencyList(Cursor productCursor) {
+        if (productCursor != null && productCursor.moveToFirst()) {
+            do {
+
+                String name = productCursor.getString(1);
+                String category = productCursor.getString(2);
+                double prize = productCursor.getDouble(3);
+                int count = productCursor.getInt(4);
+
+                products.add(name + " :" + prize + "zł Ilość:" + count + " Kategoria:" + category);
+            } while ((productCursor.moveToNext()));
+        }
     }
 
     @Override
@@ -96,7 +102,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.list_products, menu);
         return true;
     }
 
@@ -121,9 +127,8 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_listProducts) {
-            Intent intent = new Intent(getApplicationContext(),ListProductsActivity.class);
-            startActivity(intent);
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

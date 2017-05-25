@@ -11,6 +11,17 @@ public class Product {
     private String category;
     private int count;
 
+    public Product(String name, double prize, int count, String category) {
+        this.name = name;
+        this.prize = prize;
+        this.category = category;
+        this.count = count;
+    }
+
+    public Product(){
+
+    }
+
     public String getName() {
         return name;
     }
