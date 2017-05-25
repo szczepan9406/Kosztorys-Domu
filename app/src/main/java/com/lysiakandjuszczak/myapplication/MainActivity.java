@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.ButtonBarLayout;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,9 +14,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -25,9 +42,14 @@ public class MainActivity extends AppCompatActivity
     EditText  editTextPrize;
     EditText  editTextProductCount;
     EditText  editTextProductCategory;
-    Spinner   spinerCurrency;
+    Spinner   spinnerCurrency;
     Button    buttonAddProduct;
+    List<String> currnecysName;
 
+    double usdValue = 0;
+    double plnValue = 0;
+    double EuroValue = 0;
+    double GbpValue = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,15 +57,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -58,8 +71,17 @@ public class MainActivity extends AppCompatActivity
         editTextPrize = (EditText ) findViewById(R.id.editTextPrize);
         editTextProductCount = (EditText ) findViewById(R.id.editTextCount);
         editTextProductCategory = (EditText ) findViewById(R.id.editTextCategory);
-        spinerCurrency = (Spinner) findViewById(R.id.spinnerCurrency);
+        spinnerCurrency = (Spinner) findViewById(R.id.spinnerCurrency);
         buttonAddProduct = (Button) findViewById(R.id.buttonAddProduct);
+
+        currnecysName = new ArrayList<String>();
+        currnecysName.add("PLN");
+        currnecysName.add("USD");
+        currnecysName.add("EURO");
+        currnecysName.add("GBP");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,currnecysName);
+        spinnerCurrency.setAdapter(adapter);
 
         buttonAddProduct.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,18 +89,17 @@ public class MainActivity extends AppCompatActivity
                 Product product = new Product();
                 product.setName(editTextProductName.getText().toString());
                 product.setCategory(editTextProductCategory.getText().toString());
+                product.setCurrency(currnecysName.get(spinnerCurrency.getSelectedItemPosition()));
                 product.setCount(Integer.parseInt(editTextProductCount.getText().toString()));
-                Double currency = 1.00;
-                /*  pobrać kursy*/
-              //  Double prize = (Double.parseDouble(editTextPrize.getText().toString())) * (Integer.parseInt(editTextProductCount.getText().toString()) * currency) ;
-                product.setPrize(Double.parseDouble(editTextPrize.getText().toString()) * currency);
+                product.setPrize(Double.parseDouble(editTextPrize.getText().toString()));
 
                 DBManager dbManager;
                 dbManager =new DBManager(getApplicationContext());
                 dbManager.createDataBase();
                 dbManager.openDataBase();
                 dbManager.insertProduct(product);
-                /*dbManager do bazy*/
+                Toast.makeText(getApplicationContext(),"Dodano Pozycję",Toast.LENGTH_SHORT).show();
+
             }
         });
     }

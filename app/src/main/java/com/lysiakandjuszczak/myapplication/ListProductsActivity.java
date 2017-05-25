@@ -2,9 +2,6 @@ package com.lysiakandjuszczak.myapplication;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,16 +13,36 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.json.JSONArray;
+
+import java.io.IOException;
+import java.util.*;
 
 public class ListProductsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    TextView allPrize ;
-    ListView listViewProdusct;
-    List<String> products;
+    TextView textViewAllPrize;
+    ListView listViewProducts;
+    List<String> productsNames;
+    List<Product>  products = new ArrayList<Product>();
+
+    List<Currency> currencys;
+    Map<String,Double> values = new HashMap<String,Double>();
+
+    double allPrize = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,15 +50,6 @@ public class ListProductsActivity extends AppCompatActivity
         setContentView(R.layout.activity_list_products);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -52,10 +60,10 @@ public class ListProductsActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        allPrize = (TextView) findViewById(R.id.textViewAllPrize);
-        listViewProdusct = (ListView) findViewById(R.id.list_viewProducts);
+        textViewAllPrize = (TextView) findViewById(R.id.textViewAllPrize);
+        listViewProducts = (ListView) findViewById(R.id.list_viewProducts);
 
-        products  = new ArrayList<String>();
+        productsNames = new ArrayList<String>();
 
         DBManager dbManager;
         dbManager =new DBManager(getApplicationContext());
@@ -65,26 +73,32 @@ public class ListProductsActivity extends AppCompatActivity
         Cursor productsCursor = dbManager.getAllProduct();
         updateCurrencyList(productsCursor);
 
+        //textViewAllPrize.setText("Cena całkowita = " + allPrize);
+        generateAllPrize();
         populateListview();
 
 
     }
 
     private void populateListview() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,products);
-        listViewProdusct.setAdapter(adapter);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, productsNames);
+        listViewProducts.setAdapter(adapter);
     }
 
     private void updateCurrencyList(Cursor productCursor) {
         if (productCursor != null && productCursor.moveToFirst()) {
             do {
+                Product product = new Product();
+                product.setName(productCursor.getString(1));
+                product.setCategory(productCursor.getString(2));
+                product.setPrize(productCursor.getDouble(3));
+                product.setCount(productCursor.getInt(4));
+                product.setCurrency(productCursor.getString(5));
 
-                String name = productCursor.getString(1);
-                String category = productCursor.getString(2);
-                double prize = productCursor.getDouble(3);
-                int count = productCursor.getInt(4);
-
-                products.add(name + " :" + prize + "zł Ilość:" + count + " Kategoria:" + category);
+               // allPrize += (prize * count) ;
+                products.add(product);
+                productsNames.add(product.getName() + " :" + product.getPrize() + product.getCurrency() +" Ilość:" + product.getCount() + " Kategoria:" + product.getCategory());
+                //values.put(currency,prize * count);
             } while ((productCursor.moveToNext()));
         }
     }
@@ -98,7 +112,62 @@ public class ListProductsActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+    private void  generateAllPrize(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = "http://www.mycurrency.net/service/rates";
 
+        JsonArrayRequest getRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>()
+                {
+                    @Override
+                    public void onResponse(JSONArray response) {
+
+                        parseCurrencyFromJSON(response.toString());
+                        for(Product product: products){
+                            allPrize += product.getPrize() * product.getCount() * (getCounter(product.getCurrency())/getCounter("PLN"));
+                        }
+                        textViewAllPrize.setText("Cena całkowita = " + allPrize);
+                    }
+                },
+                new Response.ErrorListener()
+                {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(),"Problem z pobraniem aktualnych walut",Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        queue.add(getRequest);
+    }
+
+    private Double getCounter(String key) {
+
+        for(Currency currrency: currencys){
+            if (key.equals(currrency.getCurrency_code())){
+                return currrency.getRate();
+            }
+        }
+        return  1.00;
+    }
+
+
+    public List<Currency> parseCurrencyFromJSON(String json){
+        currencys = null;
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            currencys = mapper.readValue(json, new TypeReference<List<Currency>>(){});
+        }
+        catch (JsonParseException e){
+            e.printStackTrace();
+        }
+        catch (JsonMappingException e) {
+            e.printStackTrace();
+            System.out.print(e);
+        }
+        catch (IOException e) { e.printStackTrace(); }
+        return currencys;
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
