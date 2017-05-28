@@ -4,13 +4,12 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_listProducts"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_menu_gallery"
             android:title="Lista Produktów" />
         <item
             android:id="@+id/nav_addProduct"
             android:icon="@drawable/ic_menu_gallery"
             android:title="Dodaj produkt" />
     </group>
-
 
 </menu>
