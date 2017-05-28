@@ -27,6 +27,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+<<<<<<< HEAD
+=======
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+>>>>>>> dawid
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,6 +58,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -145,16 +150,6 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_listProducts) {
             Intent intent = new Intent(getApplicationContext(),ListProductsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
