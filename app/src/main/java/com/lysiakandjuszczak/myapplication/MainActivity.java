@@ -20,24 +20,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-<<<<<<< HEAD
-=======
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
->>>>>>> dawid
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -49,11 +34,6 @@ public class MainActivity extends AppCompatActivity
     Spinner   spinnerCurrency;
     Button    buttonAddProduct;
     List<String> currnecysName;
-
-    double usdValue = 0;
-    double plnValue = 0;
-    double EuroValue = 0;
-    double GbpValue = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

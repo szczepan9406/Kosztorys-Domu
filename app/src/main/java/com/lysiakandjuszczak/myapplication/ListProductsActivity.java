@@ -35,7 +35,6 @@ import org.json.JSONArray;
 
 import java.io.IOException;
 import java.util.*;
-=======
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -62,16 +61,12 @@ import java.text.NumberFormat;
 import java.util.*;
 
 
->>>>>>> dawid
-
 public class ListProductsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     TextView textViewAllPrize;
     ListView listViewProducts;
-<<<<<<< HEAD
     List<String> products;
-=======
     List<String> productsNames;
     List<Product>  products = new ArrayList<Product>();
 
@@ -80,7 +75,6 @@ public class ListProductsActivity extends AppCompatActivity
     Button buttonShare;
 
     double allPrize = 0;
->>>>>>> dawid
 
     List<Currency> currencys;
 
@@ -105,10 +99,7 @@ public class ListProductsActivity extends AppCompatActivity
 
         textViewAllPrize = (TextView) findViewById(R.id.textViewAllPrize);
         listViewProducts = (ListView) findViewById(R.id.list_viewProducts);
-<<<<<<< HEAD
-=======
         buttonShare = (Button) findViewById(R.id.buttonShare);
->>>>>>> dawid
 
         productsNames = new ArrayList<String>();
 
@@ -119,11 +110,9 @@ public class ListProductsActivity extends AppCompatActivity
         Cursor productsCursor = dbManager.getAllProduct();
         updateCurrencyList(productsCursor);
 
-<<<<<<< HEAD
         textViewAllPrize.setText("Cena całkowita = " + allPrize);
 
         populateListview();
-=======
         generateAllPrize();
         populateListview();
 
@@ -150,16 +139,12 @@ public class ListProductsActivity extends AppCompatActivity
 
             }
         });
->>>>>>> dawid
 
     }
 
     private void populateListview() {
-<<<<<<< HEAD
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,products);
-=======
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, productsNames);
->>>>>>> dawid
         listViewProducts.setAdapter(adapter);
     }
 
@@ -177,7 +162,6 @@ public class ListProductsActivity extends AppCompatActivity
                 allPrize += (prize * count) ;
 
                 products.add(name + " :" + prize + currency +" Ilość:" + count + " Kategoria:" + category);
-=======
                 Product product = new Product();
                 product.setName(productCursor.getString(1));
                 product.setCategory(productCursor.getString(2));
@@ -187,7 +171,6 @@ public class ListProductsActivity extends AppCompatActivity
 
                 products.add(product);
                 productsNames.add(product.getName() + "  " + product.getPrize() + product.getCurrency() +"  Ilość:" + product.getCount() + "   Kategoria:" + product.getCategory());
->>>>>>> dawid
             } while ((productCursor.moveToNext()));
         }
     }
@@ -212,10 +195,7 @@ public class ListProductsActivity extends AppCompatActivity
                     public void onResponse(JSONArray response) {
 
                         parseCurrencyFromJSON(response.toString());
-<<<<<<< HEAD
-
                     }
-=======
                         for(Product product: products){
                             allPrize += product.getPrize() * product.getCount() * (getCounter(product.getCurrency())/getCounter("PLN"));
                         }
@@ -225,7 +205,6 @@ public class ListProductsActivity extends AppCompatActivity
 
                     //przybliżanie wyniku
 
->>>>>>> dawid
                 },
                 new Response.ErrorListener()
                 {
@@ -237,8 +216,6 @@ public class ListProductsActivity extends AppCompatActivity
         );
         queue.add(getRequest);
     }
-
-<<<<<<< HEAD
 
     public List<Currency> parseCurrencyFromJSON(String json){
         currencys = null;
