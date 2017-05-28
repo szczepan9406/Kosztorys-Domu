@@ -1,5 +1,6 @@
 package com.lysiakandjuszczak.myapplication;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -10,7 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,15 +24,25 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.json.JSONArray;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
+
+
 
 public class ListProductsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -41,6 +54,7 @@ public class ListProductsActivity extends AppCompatActivity
 
     List<Currency> currencys;
     Map<String,Double> values = new HashMap<String,Double>();
+    Button buttonShare;
 
     double allPrize = 0;
 
@@ -62,21 +76,43 @@ public class ListProductsActivity extends AppCompatActivity
 
         textViewAllPrize = (TextView) findViewById(R.id.textViewAllPrize);
         listViewProducts = (ListView) findViewById(R.id.list_viewProducts);
+        buttonShare = (Button) findViewById(R.id.buttonShare);
 
         productsNames = new ArrayList<String>();
 
         DBManager dbManager;
         dbManager =new DBManager(getApplicationContext());
         dbManager.openDataBase();
-        String X = dbManager.getDatabaseName();
 
         Cursor productsCursor = dbManager.getAllProduct();
         updateCurrencyList(productsCursor);
 
-        //textViewAllPrize.setText("Cena całkowita = " + allPrize);
         generateAllPrize();
         populateListview();
 
+        buttonShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String productsJson = "";
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    productsJson = mapper.writeValueAsString(products);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+
+                Intent intentShareFile = new Intent(Intent.ACTION_SEND);
+
+                intentShareFile.setType("application/json");
+                intentShareFile.putExtra(Intent.EXTRA_STREAM, productsJson);
+
+                intentShareFile.putExtra(Intent.EXTRA_SUBJECT, "Kosztorys ");
+                intentShareFile.putExtra(Intent.EXTRA_TEXT, productsJson);
+
+                startActivity(Intent.createChooser(intentShareFile, "Udostępnij Kosztorys"));
+
+            }
+        });
 
     }
 
@@ -95,10 +131,8 @@ public class ListProductsActivity extends AppCompatActivity
                 product.setCount(productCursor.getInt(4));
                 product.setCurrency(productCursor.getString(5));
 
-               // allPrize += (prize * count) ;
                 products.add(product);
-                productsNames.add(product.getName() + " :" + product.getPrize() + product.getCurrency() +" Ilość:" + product.getCount() + " Kategoria:" + product.getCategory());
-                //values.put(currency,prize * count);
+                productsNames.add(product.getName() + "  " + product.getPrize() + product.getCurrency() +"  Ilość:" + product.getCount() + "   Kategoria:" + product.getCategory());
             } while ((productCursor.moveToNext()));
         }
     }
@@ -126,8 +160,12 @@ public class ListProductsActivity extends AppCompatActivity
                         for(Product product: products){
                             allPrize += product.getPrize() * product.getCount() * (getCounter(product.getCurrency())/getCounter("PLN"));
                         }
-                        textViewAllPrize.setText("Cena całkowita = " + allPrize);
+                        textViewAllPrize.setText("  Całość " + round(allPrize,"##.##") + "PLN");
+
                     }
+
+                    //przybliżanie wyniku
+
                 },
                 new Response.ErrorListener()
                 {
@@ -138,6 +176,12 @@ public class ListProductsActivity extends AppCompatActivity
                 }
         );
         queue.add(getRequest);
+    }
+
+    public static String round(Double number, String pattern){
+        NumberFormat format=new DecimalFormat(pattern);
+
+        return format.format(number).replace(',','.');
     }
 
     private Double getCounter(String key) {
