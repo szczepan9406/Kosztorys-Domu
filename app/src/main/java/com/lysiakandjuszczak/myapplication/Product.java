@@ -4,8 +4,10 @@ package com.lysiakandjuszczak.myapplication;
  * Created by dawid on 24.05.17.
  */
 
-public class Product {
+//klasa do opisu produktu
 
+public class Product {
+    private long id;
     private String name;
     private double prize;
     private String category;
@@ -21,6 +23,14 @@ public class Product {
 
     public Product(){
 
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getName() {

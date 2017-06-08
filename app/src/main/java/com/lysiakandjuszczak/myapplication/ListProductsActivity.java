@@ -1,5 +1,6 @@
 package com.lysiakandjuszczak.myapplication;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -7,11 +8,13 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -43,6 +46,7 @@ import java.text.NumberFormat;
 import java.util.*;
 
 
+//Klasa aktywności listy produktów
 
 public class ListProductsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -55,9 +59,11 @@ public class ListProductsActivity extends AppCompatActivity
     List<Currency> currencys;
     Map<String,Double> values = new HashMap<String,Double>();
     Button buttonShare;
+    DBManager dbManager;
 
     double allPrize = 0;
 
+    //tworzenie widoku
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,16 +86,19 @@ public class ListProductsActivity extends AppCompatActivity
 
         productsNames = new ArrayList<String>();
 
-        DBManager dbManager;
+        //otwieranie bazy danych
         dbManager =new DBManager(getApplicationContext());
         dbManager.openDataBase();
 
+        //pobieranie produktóþw z bazy danych
         Cursor productsCursor = dbManager.getAllProduct();
         updateCurrencyList(productsCursor);
 
-        generateAllPrize();
+        //inicjalizowanie  widoku
         populateListview();
 
+
+        //obsługa eksportu po kliknięciu przycisku eksportuj
         buttonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,17 +123,57 @@ public class ListProductsActivity extends AppCompatActivity
             }
         });
 
-    }
+        //obsługa usuwanie produktu
+        listViewProducts.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 
+                String title = "Usuwanie";
+                String message = "Czy chcesz usunąć produckt";
+                String button = "Usuń";
+
+                AlertDialog.Builder dialog = new AlertDialog.Builder(ListProductsActivity.this);
+                dialog.setCancelable(false);
+                dialog.setTitle(title);
+                dialog.setMessage(message);
+
+                dialog.setPositiveButton(button, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        Product product = products.get(position);
+                        dbManager.deleteProduct(product.getId());
+                        populateListview();
+                    }
+                })
+                        .setNegativeButton("Anuluj ", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        });
+                final AlertDialog alert = dialog.create();
+                alert.show();
+                return true;
+            }
+        });
+    }
+//inicjalizowanie widoku i odświeżanie po usunięciu
     private void populateListview() {
+        allPrize=0;
+        products.clear();
+        productsNames.clear();
+        Cursor productsCursor = dbManager.getAllProduct();
+        updateCurrencyList(productsCursor);
+        generateAllPrize();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, productsNames);
         listViewProducts.setAdapter(adapter);
+        listViewProducts.invalidateViews();
     }
-
+    //zapisywanie pobranych  produktów z bazy danych do listy
     private void updateCurrencyList(Cursor productCursor) {
         if (productCursor != null && productCursor.moveToFirst()) {
             do {
                 Product product = new Product();
+                product.setId(productCursor.getLong(0));
                 product.setName(productCursor.getString(1));
                 product.setCategory(productCursor.getString(2));
                 product.setPrize(productCursor.getDouble(3));
@@ -146,6 +195,8 @@ public class ListProductsActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+
+    //pobieranie kursów walut za opmocą biblioteki Volley
     private void  generateAllPrize(){
         RequestQueue queue = Volley.newRequestQueue(this);
         final String url = "http://www.mycurrency.net/service/rates";
@@ -153,20 +204,22 @@ public class ListProductsActivity extends AppCompatActivity
         JsonArrayRequest getRequest = new JsonArrayRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONArray>()
                 {
+                    //jeśli się udało pobrać
                     @Override
                     public void onResponse(JSONArray response) {
 
                         parseCurrencyFromJSON(response.toString());
                         for(Product product: products){
-                            allPrize += product.getPrize() * product.getCount() * (getCounter(product.getCurrency())/getCounter("PLN"));
+                            double pln =getCounter("PLN");
+                            double counter =pln/getCounter(product.getCurrency());
+                            allPrize += product.getPrize() * product.getCount() * counter;
                         }
                         textViewAllPrize.setText("  Całość " + round(allPrize,"##.##") + "PLN");
 
                     }
 
-                    //przybliżanie wyniku
-
                 },
+                //jeśli błąð
                 new Response.ErrorListener()
                 {
                     @Override
@@ -178,12 +231,14 @@ public class ListProductsActivity extends AppCompatActivity
         queue.add(getRequest);
     }
 
+    //zaokrąglanie
     public static String round(Double number, String pattern){
         NumberFormat format=new DecimalFormat(pattern);
 
         return format.format(number).replace(',','.');
     }
 
+    //pobieranie przelicznika z aktualnej listy walut
     private Double getCounter(String key) {
 
         for(Currency currrency: currencys){
@@ -194,7 +249,7 @@ public class ListProductsActivity extends AppCompatActivity
         return  1.00;
     }
 
-
+    //parsowanie JSONA na listę walut
     public List<Currency> parseCurrencyFromJSON(String json){
         currencys = null;
         ObjectMapper mapper = new ObjectMapper();
@@ -212,12 +267,12 @@ public class ListProductsActivity extends AppCompatActivity
         catch (IOException e) { e.printStackTrace(); }
         return currencys;
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.list_products, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.list_products, menu);
+//        return true;
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

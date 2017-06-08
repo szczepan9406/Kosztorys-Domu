@@ -14,9 +14,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created by dawid on 25.05.17.
+ * Created by Szczepan on 25.05.17.
  */
 
+
+//Klasa do obsługi bazy danych
 public class DBManager extends SQLiteOpenHelper {
 
     private static String DB_PATCH ;
@@ -41,6 +43,7 @@ public class DBManager extends SQLiteOpenHelper {
         this.myContext=context;
     }
 
+
     public void createDataBase(){
         boolean dbExist=checkDataBase();
 
@@ -48,7 +51,6 @@ public class DBManager extends SQLiteOpenHelper {
             this.getReadableDatabase();
         }
     }
-
 
     //Sprawdzenie czy istnieje  baza
     private boolean checkDataBase() {
@@ -63,7 +65,6 @@ public class DBManager extends SQLiteOpenHelper {
 
     }
 
-
     public  void openDataBase() throws SQLiteException{
         String myPath =DB_PATCH+DB_NAME;
         db =SQLiteDatabase.openDatabase(myPath,null,SQLiteDatabase.OPEN_READWRITE);
@@ -77,6 +78,7 @@ public class DBManager extends SQLiteOpenHelper {
         super.close();
     }
 
+    //tworzenie tabeli
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATE_PRODUCT_TABLE = "CREATE TABLE Product( " +
@@ -95,12 +97,13 @@ public class DBManager extends SQLiteOpenHelper {
 
     }
 
+    //pobieranie wszystkich produktów
     public Cursor getAllProduct(){
         db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM Product",null);
         return  cursor;
     }
-
+        //dodawanie do bazy danych
     public long insertProduct(Product product){
 
         ContentValues contentValues=new ContentValues();
@@ -111,6 +114,12 @@ public class DBManager extends SQLiteOpenHelper {
         contentValues.put("currency",product.getCurrency());
 
         return db.insert("Product", null,contentValues);
+    }
+
+    //usuwanie produktu
+    public boolean deleteProduct(Long id)
+    {
+        return db.delete("Product", "id=" + id, null) > 0;
     }
 
 

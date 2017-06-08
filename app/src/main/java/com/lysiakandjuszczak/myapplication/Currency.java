@@ -3,7 +3,7 @@ package com.lysiakandjuszczak.myapplication;
 /**
  * Created by dawid on 25.05.17.
  */
-
+//Klasa do przechowywania walut przeparsowanych z JSONA przez Jacksona2
 public class Currency {
     private String currency_code;
     private double rate;
